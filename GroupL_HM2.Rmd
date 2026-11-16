@@ -1,0 +1,141 @@
+---
+title: "GroupL_HM2"
+author: "Reschiotto, Norbedo, Daul"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 3
+date: "2026-11-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## FSDS - Chapter 4
+
+### Ex 4.3
+
+### Ex 4.4
+
+### Ex 4.30 (Giovanni Norbedo)
+
+When a 2015 Pew Research survey (www.pewresearch.org) asked Americans whether there is solid evidence of global warming, 92% of Democrats who identified themselves as liberal said yes whereas 38% of Republicans who identified themselves as conservative said yes. Suppose $n = 200$ for each group. If we wanted to compare responses for Democrats and Republicans, how could we do so inferentially? Prepare a short report that conducts an analysis, including assumptions and interpretations.
+
+**Solution**
+
+Let $\pi_1$ and $\pi_2$ denote the population proportions of liberal Democrats and conservative Republicans, respectively, who say there is solid evidence of global warming. We have $n_1 = 200$ with $\hat{\pi}_1 = 0.92$ ($184$ yes) and $n_2 = 200$ with $\hat{\pi}_2 = 0.38$ ($76$ yes).
+
+To compare the two groups inferentially, we can construct a 95% confidence interval for $\pi_1 - \pi_2$ and test $H_0: \pi_1 = \pi_2$ against $H_a: \pi_1 \neq \pi_2$. This relies on two assumptions: the two samples are independent random samples, and the sample sizes are large enough for the normal approximation to hold (each group has at least 10 successes and 10 failures: $184, 16, 76, 124 \ge 10$).
+
+```{r, echo=TRUE}
+n1 <- 200
+n2 <- 200
+p1 <- 0.92
+p2 <- 0.38
+
+diff <- p1 - p2
+se <- sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2)
+ci <- diff + c(-1, 1) * qnorm(0.975) * se
+
+# Two-proportion z-test using pooled proportion under H0
+p_pool <- (n1 * p1 + n2 * p2) / (n1 + n2)
+se_pool <- sqrt(p_pool * (1 - p_pool) * (1 / n1 + 1 / n2))
+z <- diff / se_pool
+pval <- 2 * pnorm(-abs(z))
+
+round(c(diff = diff, se = se, ci_low = ci[1], ci_high = ci[2], z = z), 3)
+pval
+```
+
+The point estimate of the difference is $\hat{\pi}_1 - \hat{\pi}_2 = 0.54$, with a 95% confidence interval of $(0.463, 0.617)$. We are 95% confident that the population proportion of liberal Democrats who believe there is solid evidence of global warming is between 46.3 and 61.7 percentage points higher than that of conservative Republicans. Consistently, the two-sided test gives $z = 11.321$ ($P\text{-value} < 10^{-15}$), providing very strong evidence against $H_0: \pi_1 = \pi_2$.
+
+### Ex 4.39
+
+### Ex 4.44
+
+## FSDS - Chapter 5
+
+### Ex 5.67 (Giovanni Norbedo)
+
+For a large number $n$ of independent Poisson random variables $\{Y_i\}$, with $\mu = E(Y_i)$, consider testing $H_0: \mu = \mu_0$.
+
+(a) Show that the score test statistic is $Z = \sqrt{n}(\bar{Y} - \mu_0)/\sqrt{\mu_0}$.
+(b) Show that the Wald test statistic is $Z = \sqrt{n}(\bar{Y} - \mu_0)/\sqrt{\bar{Y}}$. Under $H_0$, why would you expect the normal distribution approximation to be better for the score test statistic?
+(c) Show that the value of the likelihood-ratio test statistic for observed data $\{y_i\}$ is $2(L_1 - L_0) = 2[n(\mu_0 - \bar{y}) + n\bar{y}\log(\bar{y}/\mu_0)]$.
+(d) Explain how these tests can be used to construct confidence intervals. Illustrate for the Wald and score confidence intervals, and explain why you would expect the score method to perform better.
+
+**Solution**
+
+For $Y_1, \dots, Y_n \stackrel{\text{i.i.d.}}{\sim} \text{Poisson}(\mu)$, the log-likelihood is:
+
+$$L(\mu) = \sum_{i=1}^n \left(y_i \log\mu - \mu - \log(y_i!)\right) = n\bar{y}\log\mu - n\mu - \sum_{i=1}^n \log(y_i!)$$
+
+The score function is $U(\mu) = L'(\mu) = \frac{n\bar{y}}{\mu} - n = \frac{n(\bar{y} - \mu)}{\mu}$, and since $L''(\mu) = -\frac{n\bar{y}}{\mu^2}$, the Fisher information is $I(\mu) = -E[L''(\mu)] = \frac{n\mu}{\mu^2} = \frac{n}{\mu}$.
+
+#### (a)
+
+Evaluating $U(\mu)$ and $I(\mu)$ at $\mu_0$:
+
+$$Z_{\text{score}} = \frac{U(\mu_0)}{\sqrt{I(\mu_0)}} = \frac{n(\bar{Y} - \mu_0)/\mu_0}{\sqrt{n/\mu_0}} = \frac{\sqrt{n}(\bar{Y} - \mu_0)}{\sqrt{\mu_0}}$$
+
+#### (b)
+
+Setting $U(\mu) = 0$ gives the MLE $\hat{\mu} = \bar{Y}$, with estimated standard error $SE(\hat{\mu}) = 1/\sqrt{I(\hat{\mu})} = \sqrt{\bar{Y}/n}$. Therefore:
+
+$$Z_{\text{Wald}} = \frac{\hat{\mu} - \mu_0}{SE(\hat{\mu})} = \frac{\bar{Y} - \mu_0}{\sqrt{\bar{Y}/n}} = \frac{\sqrt{n}(\bar{Y} - \mu_0)}{\sqrt{\bar{Y}}}$$
+
+Under $H_0$, the true variance of $\bar{Y}$ is $\mu_0/n$. The score statistic divides $\bar{Y} - \mu_0$ by its exact null standard deviation $\sqrt{\mu_0/n}$, whereas the Wald statistic uses the estimated standard error $\sqrt{\bar{Y}/n}$. Estimating the standard error adds extra sampling variability (and fails if $\bar{Y} = 0$), so the normal approximation is more accurate for the score statistic.
+
+#### (c)
+
+Since $\hat{\mu} = \bar{y}$, $L_1 = L(\bar{y})$ and $L_0 = L(\mu_0)$. The $\sum \log(y_i!)$ terms cancel in the difference:
+
+$$L_1 - L_0 = (n\bar{y}\log\bar{y} - n\bar{y}) - (n\bar{y}\log\mu_0 - n\mu_0) = n(\mu_0 - \bar{y}) + n\bar{y}\log\left(\frac{\bar{y}}{\mu_0}\right)$$
+
+Multiplying by $2$ gives $2(L_1 - L_0) = 2[n(\mu_0 - \bar{y}) + n\bar{y}\log(\bar{y}/\mu_0)]$.
+
+#### (d)
+
+A $(1 - \alpha)$ confidence interval is obtained by inverting a level-$\alpha$ test: it consists of all values $\mu_0 > 0$ that are not rejected at significance level $\alpha$.
+
+For the Wald CI, solving $|\sqrt{n}(\bar{y} - \mu_0)/\sqrt{\bar{y}}| \le z_{\alpha/2}$ gives:
+
+$$\bar{y} \pm z_{\alpha/2}\sqrt{\frac{\bar{y}}{n}}$$
+
+For the score CI, solving $|\sqrt{n}(\bar{y} - \mu_0)/\sqrt{\mu_0}| \le z_{\alpha/2}$ gives the quadratic inequality $n(\bar{y} - \mu_0)^2 \le z_{\alpha/2}^2 \mu_0$, i.e. $\mu_0^2 - (2\bar{y} + z_{\alpha/2}^2/n)\mu_0 + \bar{y}^2 \le 0$, whose endpoints are:
+
+$$\left(\bar{y} + \frac{z_{\alpha/2}^2}{2n}\right) \pm z_{\alpha/2}\sqrt{\frac{\bar{y}}{n} + \frac{z_{\alpha/2}^2}{4n^2}}$$
+
+The score CI performs better because it uses the variance $\mu_0/n$ implied by each candidate $\mu_0$ rather than fixing the SE at $\sqrt{\bar{y}/n}$. When $\bar{y}$ is close to $0$, the symmetric Wald CI can produce negative lower bounds (impossible for a Poisson mean) or collapse to $[0, 0]$ when $\bar{y} = 0$, whereas the score CI always stays non-negative and has coverage probability closer to the nominal $1 - \alpha$.
+
+## FSDS - Chapter 6
+
+### Ex 6.10
+
+### Ex 6.11
+
+### Ex 6.12 (Giovanni Norbedo)
+
+For the UN data file at the book’s website (see Exercise 1.24), construct a multiple regression model predicting `Internet` using all the other variables. Use the concept of multicollinearity to explain why adjusted $R^2$ is not dramatically greater than when `GDP` is the sole predictor. Compare the estimated `GDP` effect in the bivariate model and the multiple regression model and explain why it is so much weaker in the multiple regression model.
+
+**Solution**
+
+```{r, echo=TRUE}
+un <- read.table("https://stat4ds.rwth-aachen.de/data/UN.dat", header = TRUE)
+
+m_gdp <- lm(Internet ~ GDP, data = un)
+m_full <- lm(Internet ~ GDP + HDI + GII + Fertility + CO2 + Homicide + Prison, data = un)
+
+summary(m_gdp)
+summary(m_full)
+round(cor(un[, -1]), 2)
+```
+
+With `GDP` as the sole predictor, $R^2 = `r round(summary(m_gdp)$r.squared, 3)`$ and $\text{Adjusted } R^2 = `r round(summary(m_gdp)$adj.r.squared, 3)`$. Adding the remaining six predictors increases $R^2$ to $`r round(summary(m_full)$r.squared, 3)`$ and $\text{Adjusted } R^2$ to $`r round(summary(m_full)$adj.r.squared, 3)`$, which is only a modest improvement. This is due to multicollinearity: `GDP` is strongly correlated with `HDI` ($r = 0.90$), `GII` ($r = -0.85$), and `CO2` ($r = 0.67$), and these variables are also strongly correlated with each other. Because they share much of the same information about a country's level of development, the extra predictors explain little additional variation in `Internet` beyond what `GDP` already captures, while costing 6 degrees of freedom.
+
+In the bivariate model, the estimated `GDP` slope is $\hat{\beta}_{\text{GDP}} = `r round(coef(m_gdp)["GDP"], 3)`$ ($SE = `r round(summary(m_gdp)$coefficients["GDP", "Std. Error"], 3)`$, $p < 10^{-13}$). In the multiple regression model, it drops to $\hat{\beta}_{\text{GDP}} = `r round(coef(m_full)["GDP"], 3)`$ ($SE = `r round(summary(m_full)$coefficients["GDP", "Std. Error"], 3)`$, $p = `r round(summary(m_full)$coefficients["GDP", "Pr(>|t|)"], 3)`$) and is no longer statistically significant. In the bivariate model `GDP` acts as a proxy for overall development, absorbing the indirect effects of correlated variables like `HDI` and `GII`. Once those variables are controlled for in the multiple regression, $\hat{\beta}_{\text{GDP}}$ reflects only the partial effect of `GDP` with all other predictors held fixed, so much of the shared effect is attributed to the other predictors (especially `GII`) and the standard error of `GDP` more than doubles.
+
+### Ex 6.42
+
+### Ex 6.52
