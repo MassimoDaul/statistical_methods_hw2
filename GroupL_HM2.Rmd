@@ -52,6 +52,122 @@ The point estimate of the difference is $\hat{\pi}_1 - \hat{\pi}_2 = 0.54$, with
 
 ### Ex 4.39
 
+### (a) Log-likelihood function
+
+For $n$ independent observations from an exponential distribution, the likelihood is
+
+$$
+\ell(\lambda) = \prod_{i=1}^{n} \lambda e^{-\lambda y_i}
+= \lambda^n e^{-\lambda \sum_{i=1}^{n} y_i}.
+$$
+
+Taking the logarithm, we obtain
+
+$$
+L(\lambda) = n\log(\lambda) - \lambda\sum_{i=1}^{n}y_i
+= n(\log(\lambda) - \lambda\bar{y}).
+$$
+
+### (b) Maximum likelihood estimator
+
+Differentiating with respect to $\lambda$:
+
+$$
+L'(\lambda) = \frac{n}{\lambda} - n\bar{y}.
+$$
+
+Setting the derivative equal to zero gives
+
+$$
+\hat{\lambda} = \frac{1}{\bar{y}}.
+$$
+
+To verify that this is a maximum, we compute the second derivative:
+
+$$
+L''(\lambda) = -\frac{n}{\lambda^2} < 0.
+$$
+
+Therefore, the log-likelihood is strictly concave, and
+$\hat{\lambda} = 1/\bar{y}$ is its global maximizer.
+
+### (c) Log-likelihood plots
+
+For $\bar{y} = 10$, we have $\hat{\lambda} = 0.1$.
+
+```{r}
+lambda <- seq(0.01, 4, length.out = 1000)
+lambda_hat <- 0.1
+y_bar <- 10
+
+plot_ll <- function(n) {
+  L <- n * (log(lambda) - lambda * y_bar)
+  L_hat <- n * (log(lambda_hat) - lambda_hat * y_bar)
+
+  plot(lambda, L - L_hat, type = "l",
+       col = "blue", lwd = 2,
+       xlab = expression(lambda),
+       ylab = expression(L(lambda) - L(hat(lambda))),
+       main = paste("n =", n))
+
+  abline(v = lambda_hat, col = "red", lty = 2)
+}
+
+par(mfrow = c(1, 3))
+plot_ll(1)
+plot_ll(5)
+plot_ll(10)
+par(mfrow = c(1, 1))
+```
+
+We have from a result in class that the MLE estimator is asymptotically normally
+distributed around the true parameter. So when we hold the parameter fixed and 
+increase the number of observations, we get tighter and tigher (normally and
+symmetrically) around the true value. The variance decreases linearly as $n$
+increases.
+
+### (d) Fisher Information
+
+The score function is
+
+$$
+L'(\lambda) = \frac{n}{\lambda} - \sum_{i=1}^{n}y_i.
+$$
+
+Using the negative expected second derivative:
+
+$$
+I_n(\lambda)
+= -E[L''(\lambda)]
+= -E\left[-\frac{n}{\lambda^2}\right]
+= \frac{n}{\lambda^2}.
+$$
+
+Alternatively, using the variance of the score:
+
+$$
+I_n(\lambda)
+= E[(L'(\lambda))^2]
+= \operatorname{Var}\left(\frac{n}{\lambda} - \sum_{i=1}^{n}Y_i\right).
+$$
+
+Since the observations are independent and
+$\operatorname{Var}(Y_i)=1/\lambda^2$,
+
+$$
+I_n(\lambda)
+= \sum_{i=1}^{n}\operatorname{Var}(Y_i)
+= \frac{n}{\lambda^2}.
+$$
+
+Therefore, the asymptotic distribution of the MLE is
+
+$$
+\hat{\lambda} \overset{\cdot}{\sim}
+N\left(\lambda,\frac{\lambda^2}{n}\right).
+$$
+This is why the variance is observed to shrink in part (c) as we increase $n$.
+
 ### Ex 4.44
 
 ## FSDS - Chapter 5
