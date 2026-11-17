@@ -16,6 +16,33 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Ex 4.3
 
+The binomial likelihood function is:
+
+$$
+\ell(\pi) = \binom{10}{6}\pi^6(1-\pi)^4
+$$
+
+Taking the logarithm gives:
+
+$$
+L(\pi) = \log\binom{10}{6} + 6\log(\pi) + 4\log(1-\pi)
+$$
+
+```{r}
+pi <- seq(0.001, 0.999, length.out = 1000)
+L <- dbinom(6, size = 10, prob = pi, log = TRUE)
+
+plot(pi, L, type = "l", col = "blue",
+     xlab = "pi", ylab = "Log-Likelihood")
+
+abline(v = 0.6, col = "red", lty = 2)
+```
+
+The maximum occurs at $\hat{\pi} = 0.6$. A log-transform preserves ordering because
+it's monotone increasing. Specifically, the maximum of any positive function f(x) is also
+the maximum of log(f(x)), so we know that if we maximize log-likelhood we
+also maximize the likelyhood. 
+
 ### Ex 4.4
 
 ### Ex 4.30 (Giovanni Norbedo)
