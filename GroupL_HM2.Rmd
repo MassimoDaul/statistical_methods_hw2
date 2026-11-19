@@ -45,6 +45,39 @@ also maximize the likelyhood.
 
 
 ### Ex 4.4
+### Ex 4.4 (Viola Reschiotto)
+For the Students data file (Exercise 1.2 in Chapter 1) and the corresponding population, find the maximum likelihood (ML) estimate of the population proportion believing in life after death. Construct a Wald 95% confidence interval using formula (4.8). Interpret the results.
+
+**Solution**
+```{r, echo=TRUE}
+# Load Students dataset
+Students <- read.table(
+  "https://stat4ds.rwth-aachen.de/data/Students.dat",
+  header = TRUE
+)
+
+# Sample size
+n <- nrow(Students)
+
+# Number of students believing in life after death
+x <- sum(Students$life == 1)
+
+# Maximum Likelihood estimate
+p_hat <- x / n
+
+# Standard error
+se <- sqrt(p_hat * (1 - p_hat) / n)
+
+# Wald 95% confidence interval
+lower <- p_hat - 1.96 * se
+upper <- p_hat + 1.96 * se
+
+# Display results
+cat("ML estimate:", round(p_hat, 4), "\n")
+cat("95% Wald confidence interval:",
+    round(lower, 4), "-", round(upper, 4), "\n")
+```
+The maximum likelihood estimate of thw population proportion is 0,5167, indicating that approximately 51,67% of the students in the sample belive in life after death. The wald 95% confidence level is [0.3902, 0.6431]. This means that we are 95% confident that the true population proportion of students who believe in life after death is between 39,02% and 64,31%.
 
 ### Ex 4.30 (Giovanni Norbedo)
 
@@ -197,6 +230,155 @@ $$
 This is why the variance is observed to shrink in part (c) as we increase $n$.
 
 ### Ex 4.44
+### Ex 4.44 (Viola Reschiotto)
+Refer to the previous two exercises. Consider the selling prices (in thousands of dollars) in the Houses data file mentioned in Exercise 4.31.
+
+a) Fit the normal distribution to the data by finding the ML estimates of μ and σ for that distribution.
+
+a) Fit the log-normal distribution to the data by finding the ML estimates of its parameters.
+
+c) Find and compare the ML estimates of the mean and standard deviation of selling price for the two distributions.
+
+d) Superimpose the fitted normal and log-normal distributions on a histogram of the data. Which distribution seems to be more appropriate for summarizing the selling prices?
+
+**Solution** 
+
+```{r, echo=TRUE
+# Load Houses dataset
+Houses <- read.table(
+  "https://stat4ds.rwth-aachen.de/data/Houses.dat",
+  header = TRUE
+)
+
+# Extract selling prices
+price <- Houses$price
+
+# Number of observations
+n <- length(price)
+
+n
+
+a)  Fit the normal distribution
+
+# ML estimates for the normal distribution
+mu_hat <- mean(price)
+
+sigma_hat <- sqrt(
+  mean((price - mu_hat)^2)
+)
+
+# Display results
+mu_hat
+sigma_hat
+
+b)  Fit the log-normal distribution
+
+# Logarithm of selling prices
+log_price <- log(price)
+
+# ML estimates for the log-normal distribution
+mu_log_hat <- mean(log_price)
+
+sigma_log_hat <- sqrt(
+  mean((log_price - mu_log_hat)^2)
+)
+
+# Display results
+mu_log_hat
+sigma_log_hat
+
+c)  Compare the ML estimates of the mean and standard deviation
+
+For the normal distribution, the estimated mean and standard deviation are:
+
+$$
+\widehat{\mu}_{N}=\widehat{\mu}
+$$
+
+$$
+\widehat{\sigma}_{N}=\widehat{\sigma}
+$$
+
+For the log-normal distribution, the estimated mean and standard deviation are:
+
+e^{\widehat{\mu}{log}+\widehat{\sigma}{log}^{2}/2}
+$$
+
+\sqrt{
+(e^{\widehat{\sigma}{log}^{2}}-1)
+e^{2\widehat{\mu}{log}+\widehat{\sigma}_{log}^{2}}
+}
+$$
+
+# Mean and standard deviation for the normal distribution
+mean_normal <- mu_hat
+sd_normal <- sigma_hat
+
+# Mean and standard deviation for the log-normal distribution
+mean_lognormal <- exp(
+  mu_log_hat + sigma_log_hat^2 / 2
+)
+
+sd_lognormal <- sqrt(
+  (exp(sigma_log_hat^2) - 1) *
+  exp(2 * mu_log_hat + sigma_log_hat^2)
+)
+
+# Compare the two distributions
+comparison <- data.frame(
+  Distribution = c("Normal", "Log-normal"),
+  Mean = c(mean_normal, mean_lognormal),
+  Standard_Deviation = c(sd_normal, sd_lognormal)
+)
+
+round(comparison, 2)
+
+d)  Plot the fitted distributions on a histogram
+
+# Histogram of selling prices
+hist(
+  price,
+  probability = TRUE,
+  breaks = 12,
+  main = "Normal and Log-normal Distributions",
+  xlab = "Selling price (thousands of dollars)",
+  ylab = "Density",
+  col = "lightgray",
+  border = "white"
+)
+
+# Fitted normal distribution
+curve(
+  dnorm(x, mean = mu_hat, sd = sigma_hat),
+  from = 0,
+  to = max(price),
+  add = TRUE,
+  col = "red",
+  lwd = 2
+)
+
+# Fitted log-normal distribution
+curve(
+  dlnorm(x, meanlog = mu_log_hat, sdlog = sigma_log_hat),
+  from = 0,
+  to = max(price),
+  add = TRUE,
+  col = "blue",
+  lwd = 2
+)
+
+# Legend
+legend(
+  "topright",
+  legend = c("Normal", "Log-normal"),
+  col = c("red", "blue"),
+  lwd = 2
+)
+```
+The normal and log-normal distributions provide two different ways of describing the selling prices. The log-normal distribution is suitable for positively skewed data because it only takes positive values and allows for a longer right tail.
+
+Based on the histogram, the more appropriate distribution is the one that follows the shape of the observed data more closely.
+
 
 ## FSDS - Chapter 5
 
@@ -260,6 +442,22 @@ The score CI performs better because it uses the variance $\mu_0/n$ implied by e
 a) 
 ```{r}
 students <- read.table(
+### Ex 6.11 (Viola Reschiotto)
+Refer to the model fitted in the previous exercise to predict college GPA.
+
+a) Test (H_0:\beta_1=\beta_2=\beta_3=0). Report the P-value and interpret.
+
+b) Show how to conduct a significance test about the individual effect of hsgpa, adjusting for tv and sport, using (\alpha=0.05). Interpret.
+
+c) Is the effect in (b) significant at the (\alpha=0.05) level if we use the Bonferroni approach to test the family of three individual effects? Explain.
+
+d) Are the effects of tv and sport significant? Propose an alternative model.
+
+**Solution**
+
+```{r, echo=TRUE}
+# Load Students dataset
+Students <- read.table(
   "https://stat4ds.rwth-aachen.de/data/Students.dat",
   header = TRUE
 )
@@ -300,6 +498,107 @@ the correlation between the true GPA values and the ones we predicted is about a
 
 
 ### Ex 6.11
+# Fit the multiple linear regression model
+model <- lm(cogpa ~ hsgpa + tv + sport, data = Students)
+
+# Display model summary
+summary(model)
+
+a) Test the overall significance of the model
+
+We test the following hypotheses:
+$$
+H_0:\beta_1=\beta_2=\beta_3=0
+$$
+$$
+H_1:\text{At least one coefficient is different from zero}
+$$
+
+# Calculate the overall F-statistic
+F_stat <- summary(model)$fstatistic
+
+# Extract the overall p-value
+p_overall <- pf(
+  F_stat[1],
+  F_stat[2],
+  F_stat[3],
+  lower.tail = FALSE
+)
+
+# Display results
+F_stat
+p_overall
+
+b) Test the individual effect of hsgpa
+
+We test whether hsgpa has a significant effect on college GPA, controlling for tv and sport.
+
+The hypotheses are:
+$$
+H_0:\beta_1=0
+$$
+$$
+H_1:\beta_1\neq 0
+$$
+We use a significance level of (\alpha=0.05).
+
+# Display the coefficient estimates and t-test results
+summary(model)$coefficients["hsgpa", ]
+
+# Extract the p-value
+p_hsgpa <- summary(model)$coefficients[
+  "hsgpa", "Pr(>|t|)"
+]
+
+# Decision at alpha = 0.05
+p_hsgpa < 0.05
+
+c) Bonferroni correction
+
+We apply the Bonferroni correction to the three individual tests concerning hsgpa, tv, and sport.
+The adjusted significance level is:
+$$
+\alpha^*=\frac{0.05}{3}=0.0167
+$$
+
+# Significance level
+alpha <- 0.05
+
+# Bonferroni adjusted significance level
+alpha_bonf <- alpha / 3
+
+# Extract p-values for the three predictors
+p_values <- summary(model)$coefficients[
+  c("hsgpa", "tv", "sport"),
+  "Pr(>|t|)"
+]
+
+# Adjusted p-values
+p_adjusted <- p.adjust(p_values, method = "bonferroni")
+
+# Display adjusted p-values
+p_adjusted
+
+# Check whether hsgpa is significant after Bonferroni correction
+p_adjusted["hsgpa"] < alpha
+
+d) Test the effects of tv and sport and propose an alternative model
+
+We examine the individual p-values of tv and sport. We then fit a simpler model including only hsgpa and compare it with the original model.
+# Display p-values for tv and sport
+p_values[c("tv", "sport")]
+
+# Fit the alternative model
+model_alt <- lm(cogpa ~ hsgpa, data = Students)
+# Display the alternative model summary
+summary(model_alt)
+# Compare the reduced and full models
+anova(model_alt, model)
+```
+The overall F-test evaluates whether the three predictors jointly explain a significant proportion of the variability in college GPA.
+The individual t-test for hsgpa assesses whether high school GPA has a significant effect on college GPA, while controlling for weekly television and sports hours.
+The Bonferroni correction accounts for the three individual tests by reducing the significance level to 0.0167. Therefore, the effect of hsgpa is considered significant only if its adjusted p-value is below 0.05. The alternative model includes only hsgpa. The ANOVA comparison determines whether removing tv and sport significantly reduces the explanatory power of the original model.
+
 
 ### Ex 6.12 (Giovanni Norbedo)
 
@@ -366,3 +665,131 @@ positive and negative contributions to the variance will almost cancel out. The 
 
 
 ### Ex 6.52
+### Ex 6.52 (Viola Reschiotto)
+
+a) F-statistic for testing the overall significance of the model
+We want to show that, for testing
+$$
+H_0:\beta_1=\cdots=\beta_p=0,
+$$
+the F-statistic
+$$
+F=\frac{(TSS-SSE)/p}{SSE/[n-(p+1)]}
+$$
+can be expressed in terms of \(R^2\).
+
+Recall that the coefficient of determination is defined as
+$$
+R^2=\frac{TSS-SSE}{TSS}.
+$$
+
+Rearranging this expression, we obtain
+$$
+TSS-SSE=R^2TSS.
+$$
+
+Also, since
+$$
+1-R^2=\frac{SSE}{TSS},
+$$
+
+we have
+$$
+SSE=(1-R^2)TSS.
+$$
+
+Substituting these expressions into the original F-statistic gives
+$$
+F=
+\frac{R^2TSS/p}
+{(1-R^2)TSS/[n-(p+1)]}.
+$$
+
+Cancelling \(TSS\) from the numerator and denominator, we obtain
+$$
+\boxed{
+F=\frac{R^2/p}{(1-R^2)/[n-(p+1)]}
+}
+$$
+
+**Why do larger values of \(R^2\) yield larger values of \(F\)?**
+
+As \(R^2\) increases, the numerator increases while the denominator decreases. Therefore, the F-statistic also increases. Larger values of \(R^2\) indicate that the model explains a greater proportion of the variability in the response variable. Consequently, there is stronger evidence against the null hypothesis.
+
+b) F-statistic for comparing nested linear models
+
+Consider two nested linear models fitted to the same dataset:
+- Model 0 is the reduced model, with \(p_0\) predictors.
+- Model 1 is the full model, with \(p_1\) predictors, where \(p_1>p_0\).
+The full model includes all the predictors of the reduced model, plus additional predictors.
+
+The F-statistic for comparing the two models is
+$$
+F=
+\frac{(SSE_0-SSE_1)/(p_1-p_0)}
+{SSE_1/[n-(p_1+1)]}.
+$$
+
+Recall that the coefficient of determination for each model is
+$$
+R_0^2=1-\frac{SSE_0}{TSS}
+$$
+
+and
+$$
+R_1^2=1-\frac{SSE_1}{TSS}.
+$$
+
+Rearranging both expressions, we obtain
+$$
+SSE_0=TSS(1-R_0^2)
+$$
+
+and
+$$
+SSE_1=TSS(1-R_1^2).
+$$
+
+Now, consider the difference between the two sums of squared errors:
+$$
+SSE_0-SSE_1
+=
+TSS(1-R_0^2)-TSS(1-R_1^2).
+$$
+
+Taking \(TSS\) as a common factor:
+$$
+SSE_0-SSE_1
+=
+TSS[(1-R_0^2)-(1-R_1^2)].
+$$
+
+Simplifying:
+$$
+\boxed{
+SSE_0-SSE_1=TSS(R_1^2-R_0^2)
+}
+$$
+
+Substituting these expressions into the original F-statistic gives
+$$
+F=
+\frac{TSS(R_1^2-R_0^2)/(p_1-p_0)}
+{TSS(1-R_1^2)/[n-(p_1+1)]}.
+$$
+
+Cancelling \(TSS\) from the numerator and denominator, we obtain
+$$
+\boxed{
+F=
+\frac{(R_1^2-R_0^2)/(p_1-p_0)}
+{(1-R_1^2)/[n-(p_1+1)]}
+}
+$$
+
+Therefore, the F-statistic can be expressed in terms of the difference between the two \(R^2\) values. It measures whether the additional predictors in the full model significantly improve its explanatory power compared with the reduced model.
+
+
+a) A larger \(R^2\) leads to a larger F-statistic, indicating stronger evidence against the null hypothesis that all regression coefficients are equal to zero.
+
+b) The F-statistic evaluates the improvement obtained by adding predictors to a reduced model. A larger increase in \(R^2\), relative to the number of additional predictors, results in a larger F-statistic and provides stronger evidence that the full model offers a significant improvement.
